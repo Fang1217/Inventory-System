@@ -1,79 +1,165 @@
 #include <iostream>
+#include <string>
+#include <regex>
 using namespace std;
 
-static int inventoryLimit = 100;
-string searchProdName;
-string searchBrand;
+//Function declaration
+void Display(int start, int end);
+void Insert();
+void Search();
+void Edit();
+void Delete();
+void Checkout();
 
+//Operation function declaration
+string stringToLower(string str);
+bool isBetween(char lower, char upper, char input);
+bool isInteger(string str);
+bool isDouble(string str);
+
+//Var declaration
+static int inventoryLimit = 100;
 int productCount = 0;
-struct inventory
+struct inventory 
 {
-    int id; //+1 offset to number of product, e.g. product[0] has ID of 1.
-    string type; 
+    int id; //Humans start counting from 1, e.g. product[0] has ID of 1.
+    string type;
     string brand;
     int qty;
     double buyPrice;
     double sellPrice;
 } product[100];
 
+int main()
+{
+    string input;
+    char choice;
+    do
+    {   //Main menu section
+        cout << "\tWelcome to Inventory System. ^U^\n";
+        if (productCount > 0) {
+            //If at least 1 product is added, display the cart.
+            cout << "\nCurrent inventory:\n";   
+            Display(0, productCount);
+        }
+        cout << "1.Insert product\n" 
+             << "2.Search product\n"
+             << "3.Edit\n" 
+             << "4.Delete\n"
+             << "5.Checkout\n" 
+             << "6.Exit\n\n";
+        do 
+        {
+            cout << "Please select your option (1-6): ";
+            getline(cin, input);
+            choice = input[0];
+            switch(choice)
+            {
+                case '1': //Insert product
+                    Insert();
+                    break;
+                case '2': //Search product
+                    Search();
+                    break;
+                case '3': //Edit
+                    Edit();
+                    break;
+                case '4': //Delete
+                    Delete();
+                    break;
+                case '5': //Checkout
+                    Checkout();
+                    break;
+                case '6':
+                    system("cls");
+                    cout << "\n\t\t\tThank you for choosing us.\n\t\t\tEnjoy Your Products! ^U^\n";
+                    return 0;
+                    break;
+                default:
+                    cout << "Invalid option!" << endl << endl;
+                    break;
+            }
+        }   while(!isBetween('1', '6', choice)); //Repeat for error input.
+    }   while(isBetween('1', '5', choice)); //Repeat after completing the section.
+    return 0;
+}
+
+//Operation functions
 string stringToLower(string str) {
-    //Lower all the characters for case insensitive comparison, created due to predefined method not able to convert strings.
+    //Lower all the characters for case insensitive comparison, created due to 
+    //predefined method not able to convert strings.
     for (int i = 0; str[i]!='\0'; i++)
 	{
-		if (str[i] >= 'A' && str[i] <= 'Z') 
+		if (str[i] >= 'A' && str[i] <= 'Z')
 			str[i] = str[i] + 32;
 	}
     return str;
 }
+bool isBetween(char lower, char upper, char input) {
+    //Self explainatory. Returns true if input char is between lower and upper.
+    lower = toupper(lower);
+    upper = toupper(upper);
+    input = toupper(input);
 
-void print_menu()
-{
-    //Display all the products and brands.
-
-    /* Note: All items aligned left for least complexity.
-       Also note: This list can be dynamic in the future.
-    */
-    system("cls");
-    cout
-    <<  " Product List                        \n"
-    <<  "+------+--------------+-------------+\n"
-    <<  "| List | Product      | Brand       |\n"
-    <<  "+------+--------------+-------------+\n"
-    <<  "|  a.  | Racquet      | Yonex       |\n"
-    <<  "|  b.  |              | Li Ning     |\n"
-    <<  "|  c.  |              | Fleet       |\n"
-    <<  "|  d.  |              | Apacs       |\n"
-    <<  "|  e.  |              | Victor      |\n"
-    <<  "+------+--------------+-------------+\n"
-    <<  "|  f.  | Shuttlecock  | Yonex       |\n"
-    <<  "|  g.  |              | Li Ning     |\n"
-    <<  "|  h.  |              | RSL         |\n"
-    <<  "|  i.  |              | Ling Mei    |\n"
-    <<  "+------+--------------+-------------+\n"
-    <<  "|  j.  | Grip tape    | Yonex       |\n"
-    <<  "|  k.  |              | Li Ning     |\n"
-    <<  "|  l.  |              | Apacs       |\n"
-    <<  "|  m.  |              | Victor      |\n"
-    <<  "+------+--------------+-------------+\n";
+    if (lower <= input && input <= upper)
+        return true;
+    else
+        return false; 
 }
+bool isInteger(string str) { //Check whether the input is a int.
+    return regex_match(str, regex("[0-9]+"));    
+}
+bool isDouble(string str) { //Check whether the input is a double.
+    //I have no other idea other than RegEx, sorry. -Fang
+    //[0-9] represents match from 0-9, + represents contains 1 or more (digits 0-9)
+    //[.] represents the literal dot
+    //()? - () represents capture group, which is captured by ?, 
+    //which indicates 0 or 1 that specific capture group.
+    //Overall, it represents that number has many digits, 
+    //and may or may not have a decimal point.
+    //(Negative values are not counted).
+    return regex_match(str, regex("[0-9]+([.][0-9]+)?"));
+}
+//End of Operation functions
+
 void Insert()
 {
     char choice, next;
     int i;
     string input;
-    do  //Adding one item section, with further do while loop responsible for details of that item.
+    do  //Section to add item, with loop responsible for each details of that item.
     {
-        print_menu();
-        i = productCount; 
+        //Display all the products and brands.
+        system("cls"); //Clear terminal.
+        cout
+        <<  " Product List                        \n"
+        <<  "+------+--------------+-------------+\n"
+        <<  "| List | Product      | Brand       |\n"
+        <<  "+------+--------------+-------------+\n"
+        <<  "|  a.  | Racquet      | Yonex       |\n"
+        <<  "|  b.  |              | Li Ning     |\n"
+        <<  "|  c.  |              | Fleet       |\n"
+        <<  "|  d.  |              | Apacs       |\n"
+        <<  "|  e.  |              | Victor      |\n"
+        <<  "+------+--------------+-------------+\n"
+        <<  "|  f.  | Shuttlecock  | Yonex       |\n"
+        <<  "|  g.  |              | Li Ning     |\n"
+        <<  "|  h.  |              | RSL         |\n"
+        <<  "|  i.  |              | Ling Mei    |\n"
+        <<  "+------+--------------+-------------+\n"
+        <<  "|  j.  | Grip tape    | Yonex       |\n"
+        <<  "|  k.  |              | Li Ning     |\n"
+        <<  "|  l.  |              | Apacs       |\n"
+        <<  "|  m.  |              | Victor      |\n"
+        <<  "+------+--------------+-------------+\n";
+        i = productCount;
         product[i].id = i + 1;
-        cout << ""<< product[i].id << "." << endl; //Storing starts from 0, but humans start counting from 1
         do  //Type and brand of product
-        {   
-            //WARNING: Infinite loop in this method (do while loops), this is also true on other cin input where it's broken when letters are inputted.
-            cout << "Enter a choice from the menu(a-m) from product " << product[i].id << ":";
-            cin  >> choice;
-            switch (toupper(choice))
-            {
+        {
+            cout << "Enter a choice from the menu(a-m) from product " << product[i].id << ": ";
+            getline(cin, input); //Using getline instead of cin to combat errors regarding spaces.
+            choice = toupper(input[0]); //Taking only first letter, to prevent errors.
+            switch (choice) {
                 case 'A':
                     product[i].type="Racquet"; product[i].brand="Yonex";
                     break;
@@ -114,244 +200,260 @@ void Insert()
                     product[i].type="Grip tape"; product[i].brand="Victor";
                     break;
                 default:
-                    break;
-            }
-                if ((toupper(choice) < 'A') || (toupper(choice) > 'M'))
                     cout << "Please enter an alphabet within a-m\n";
-            
-        }   while((toupper(choice) < 'A') || (toupper(choice) > 'M')); //If error, try again
-        
+                    break;
+            }                    
+        }   while (!isBetween('A', 'M', choice)); //If error, try again
+
         do  //Qty of product
-        {   //NOTE: This will have inf loop if single letters are entered (as if it's >0)
+        {
             cout << product[i].type << " - " << product[i].brand << "\n";
             cout << "Enter quantity of product: ";
-            cin  >> product[i].qty;
-            if (product[i].qty <= 0) 
+            getline(cin, input);
+            if (!isInteger(input))
+                //Nmber checks are needed (across the application) in order to 
+                //counter accidental letter inputs.
                 cout << "Invalid input.\n";
-        }   while (product[i].qty <= 0); //If error, try again
-        
+            else 
+                product[i].qty = stoi(input);
+                //string::stoi(string str) converts string into int.
+        }   while (!isInteger(input)); //If error, try again
+
         do  //Cost of product
         {
-            cout.setf(ios::fixed, ios::showpoint);
+            cout.setf(ios::fixed | ios::showpoint);
             cout.precision(2);
             cout << "Enter cost of product: ";
-            cin  >> product[i].buyPrice;
-            if (product[i].buyPrice <= 0)
+            getline(cin, input);
+            if (!isDouble(input))
                 cout<<"\nInvalid product cost.\n";
-        }   while (product[i].buyPrice <= 0);
-        
+            else 
+                product[i].buyPrice = stod(input);
+                //string::stod(string str) converts string into double.
+        }   while (!isDouble(input));
+
         do  //Selling price of product
         {
-            cout<<"Enter selling price of product: ";
-            cin>>product[i].sellPrice;
-            if (product[i].sellPrice <= 0)
+            cout << "Enter selling price of product: ";
+            getline(cin, input);
+            if (!isDouble(input))
             {
-                cout << "\nProduct selling price must be > 0\n";
+                cout << "\nInvalid product selling price.\n";
             }
-            else if (product[i].sellPrice <= product[i].buyPrice)
+            else 
             {
-                cout << "\nProduct selling price must be greater than product cost\n";
+                product[i].sellPrice = stod(input);
+                if (product[i].sellPrice <= product[i].buyPrice)
+                    cout << "\nProduct selling price must be greater than product cost.\n";
             }
-        }   while ((product[i].sellPrice <= 0) || (product[i].sellPrice <= product[i].buyPrice));
-        
+        }   while ((!isDouble(input)) || (product[i].sellPrice <= product[i].buyPrice));
         productCount++;
-        
+        cout << "Product added successfully.\n";
         do  //Query on adding next product
-        {
-            cout << "Producted added successfully." << endl
-                 << "Do you want to add more product? (Y/N)";
-            cin  >> next;
-            if (toupper(next) != 'Y' && toupper(next) != 'N')
+        {   
+            cout << "Do you want to add more product? (Y/N)";
+            getline(cin, input);
+            choice = input[0];
+            if (toupper(choice) != 'Y' && toupper(choice) != 'N')
             {
                 cout << "Invalid response.\n";
             }
-        }   while (toupper(next) != 'Y' && toupper(next) != 'N');
-        
-    }   while (toupper(next) == 'Y'); //Stop adding next product
+        }   while (toupper(choice) != 'Y' && toupper(choice) != 'N');
+        system("cls");
+    }   while (toupper(choice) == 'Y'); //Stop adding next product
 }
 
-void Display()
+void Display(int start, int end)
 {
-    //Display the inventory (only if 1 or more items)
-    cout << "\nCurrent inventory:"<<endl<<endl;
+    //Display from entry (int start) to (int end).
     cout << " Id\tName\t\tBrand\t\tQuantity\t Cost(RM)\t Selling Price(RM)"<<endl;
-        for(int i = 0; i < productCount; i++)
-        {
-            cout<<" "<<product[i].id<<".\t"<<product[i].type<<"  \t"<<product[i].brand<<"\t\t   "<<product[i].qty<<"\t\t  "<<product[i].buyPrice<<"\t\t   "
-            <<product[i].sellPrice<<endl;
-        }
+    for (int i = start; i < end; i++)
+    {
+        cout
+        << " "
+        <<  product[i].id       <<".\t"
+        <<  product[i].type     <<"  \t"
+        <<  product[i].brand    <<"\t\t  "
+        <<  product[i].qty      <<"\t\t  "
+        <<  product[i].buyPrice <<"\t\t\t"
+        <<  product[i].sellPrice
+        << "\n";
+    }
+    cout << "\n";
 }
-void Search()
-{
-    //Searches the inventory (search keyword case insensitive.)
-    string searchQuery[4]; 
-    bool found;
-    cin.ignore();
+void Search() //Searches the inventory (search keyword case insensitive.)
+{   
+    if (productCount == 0) {
+        system("cls");
+        cout << "You can't search for product when there is no product.\n\n";
+        return; 
+    }
+    bool found = false;  
+    string searchProdName;
+    string searchBrand;
+    string searchQuery[4];  // 0: search type, 1: inv type, 2: search brand, 3: inv brand
     cout<<"Enter name of product you want to find: ";
     getline(cin,searchQuery[0]);
     cout<<"Enter the brand of product you want to find: ";
     getline(cin,searchQuery[2]);
     for(int i = 0; i < 2; i++)
-        stringToLower(searchQuery[i * 2]); //0, 2
-    for(int i = 0; i < productCount; i++)          
-    {   
+        searchQuery[i * 2] = stringToLower(searchQuery[i * 2]); //0, 2
+    for(int i = 0; i < productCount; i++)
+    {
         searchQuery[1] = stringToLower(product[i].type);
         searchQuery[3] = stringToLower(product[i].brand);
-        if (searchQuery[0] == searchQuery[1] && searchQuery[2] == searchQuery[3])       
+        if (searchQuery[0] == searchQuery[1] && searchQuery[2] == searchQuery[3])
         {   //Case insensitive comparison
             found = true;
-            cout << "Product "  << product[i].type << " found, details as follows:"<<endl;
-            cout << " Id\tName\t\tBrand\t\tQuantity\t Cost(RM)\t Selling Price(RM)"<<endl;
-            cout << " "<<product[i].id<<".\t"<<product[i].type<<"  \t"<<product[i].brand<<"\t\t   "<<product[i].qty<<"\t\t  "<<product[i].buyPrice<<"\t\t   "
-            <<product[i].sellPrice<<endl;
-            break;
+            cout << "Product " << product[i].type << " found, details as follows:"<<endl;
+            Display(i, i+1);
+            cout << "Press enter to continue.";
+            getline(cin, searchProdName);
+            system("cls");
+            return;
         }
     }
-    if (!found) 
-        cout << "Product not found in inventory system." << endl;
+    if (!found)
+        system("cls");
+        cout << "Product not found in inventory system.\n\n";
 }
 
 void Delete()
-{
+{   
+    string input;
     int id;
+    if (productCount == 0) {
+        system("cls");
+        cout << "You can't delete product when there is no product.\n\n";
+        return; 
+    }
     cout << "Enter the product ID to delete (Enter 0 to delete all, or -1 to cancel): ";
-    cin  >> id;
-    if (id == 0) //Clear all
-    {
-        for(int i = 0; i < inventoryLimit; i++)
-        {
-            product[i].type = "";
-            product[i].brand = "";
-            product[i].qty = 0;
-            product[i].buyPrice = 0;
-            product[i].sellPrice = 0;
-        }
-        cout << "All product deleted successfully." << endl;
-    }
-    else if (id > 0 && id <= inventoryLimit) //Clear the particular ID
-    {
-        id--;
-        product[id].type = "";
-        product[id].brand = "";
-        product[id].qty = 0;
-        product[id].buyPrice = 0;
-        product[id].sellPrice = 0;
-        cout << "Deleted successfully." << endl;
-    }
-    else if (id == -1) //Cancel (do nothing)
-    {
-    }
-    else //Error input
-    {
+    getline(cin, input);
+    if (input == "-1") {system("cls");} //do nothing
+    else if (!isInteger(input)) {
         cout<<"Invalid option."<<endl;
         Delete();
     }
+    else
+    {
+        id = stoi(input); 
+        if (id == 0) //Clear all
+        {
+            for(int i = 0; i < productCount; i++)
+            {
+                product[i].type = "";
+                product[i].brand = "";
+                product[i].qty = 0;
+                product[i].buyPrice = 0;
+                product[i].sellPrice = 0;
+            }
+            productCount = 0;
+            system("cls");
+            cout << "All product deleted successfully.\n\n";
+        }
+        else if (id > 0 && id <= productCount) //Clear a particular ID
+        {
+            //Move up the empty row to replace the row that was deleted.
+            for (int i = id - 1; i < inventoryLimit; i++) {
+                product[i].type = product[i+1].type;
+                product[i].brand = product[i+1].brand;
+                product[i].qty = product[i+1].qty;
+                product[i].buyPrice = product[i+1].buyPrice;
+                product[i].sellPrice = product[i+1].sellPrice;
+            }
+            system("cls");
+            cout << "Deleted successfully.\n\n";
+            productCount--;
+        }
+    }
 }
 
-void Update()
+void Edit()
 {
+    string input;
     int id;
-    cout << "Enter the product ID to update (Enter 0 to delete all, or -1 to cancel): ";
-    cin  >> id;
-    id--;
-    if (id > inventoryLimit || id < -1) //Invalid check
-    {
-        cout << "Invalid ID!" << endl;
-        Update();
+    if (productCount == 0) {
+        system("cls");
+        cout << "You can't edit product when there is no product.\n\n";
+        return; 
     }
-    if (id == -1) {} //-1 to cancel
-    else 
-    {
-        cin.ignore();
-        cout<<"Enter new name: ";
-        getline(cin,product[id].type);
-        cout<<"Enter new brand: ";
-        getline(cin,product[id].brand);
-        cout<<"Enter new quantity: ";
-        cin>>product[id].qty;
-        cout<<"Enter new cost: ";
-        cin>>product[id].buyPrice;
-        cout<<"Enter new selling price: ";
-        cin>>product[id].sellPrice;
-    }
-    cout<<"Updated successfully.\n";
-}
-
-void Checkout(){
-    int id;
-    int qty;
-    cout << "Enter product id: ";
-    cin  >> id;
-    id--;
-    cout << "How many product you want to checkout: ";
-    cin  >> qty;
-    if(id > productCount || id < 0)
-    {
-        cout << "Invalid Id!" << endl;
-        Checkout();
+    cout << "Enter the product ID to edit (Enter 0 to cancel): ";
+    getline(cin, input);
+    if (!isInteger(input) || (stoi(input) > productCount)) {
+        //If input is not a number, or is a number but bigger than productCount
+        cout<<"Invalid option."<<endl;
+        Edit();
     }
     else
     {
-        if (qty > product[id].qty)
+        id = stoi(input) - 1;
+        if (id == 0) {system("cls");} //do nothing 
+        else if (id > 0 && id <= productCount) //Edit a particular ID
         {
-            cout<<"Invalid quantity for checkout."<<endl<<endl;
-        }
-        else
-        {
-          product[id].qty = product[id].qty - qty;
-          double profit;
-          profit = qty * (product[id].sellPrice - product[id].buyPrice);
-          cout << "\n\t\t\tProduct checkout successfully, Profit in RM: "<< profit;
+            cout<<"Enter new product type: ";
+            getline(cin,product[id].type);
+            cout<<"Enter new product brand: ";
+            getline(cin,product[id].brand);
+            //For int and double, checks (do while loops) are needed 
+            //  before inputting, to prevent errors.
+            do {
+                cout<<"Enter new quantity: ";
+                getline(cin, input);
+                if (!isInteger(input))
+                    cout << "Invalid input.";
+                else product[id].qty = stoi(input);
+            }  while (!isInteger(input));
+            do {
+                cout<<"Enter new cost: ";
+                getline(cin, input);
+                if (!isDouble(input))
+                    cout << "Invalid input.";
+                else product[id].buyPrice = stod(input);
+            }  while (!isInteger(input));
+            do {
+                cout<<"Enter new selling price: ";
+                getline(cin, input);
+                if (!isDouble(input))
+                    cout << "Invalid input.";
+                else product[id].sellPrice = stod(input);
+            }  while (!isInteger(input));
+            system("cls");
+            cout << "Updated successfully.\n\n";
         }
     }
 }
 
-int main()
-{
-    char input;
-    //system("color 75");
-    cout << "\n\t\t\t\tWelcome to Inventory System. ^U^ ";
-
-    do
-    {
-        if (productCount > 0) {
-            Display(); 
+void Checkout(){
+    string input;
+    int id, qty;
+    double profit;
+    if (productCount == 0) {
+        system("cls");
+        cout << "You can't checkout when there is no product.\n\n";
+        return; 
+    }
+    cout << "Enter the product ID (Enter 0 to cancel): ";
+    getline(cin, input);
+    if (!isInteger(input) || (stoi(input) > productCount)) {
+        //If input is not a number, or is a number but bigger than productCount
+        cout<<"Invalid input."<<endl;
+        Checkout();
+    }
+    else if (input == "0") {system("cls");}
+    else
+    {   
+        cout << "How many product you want to checkout: ";
+        getline(cin, input);
+        if (!isInteger(input) || stoi(input) > product[id].qty)
+            cout<<"Invalid quantity for checkout."<<endl<<endl;
+        else {
+            qty = stoi(input);
+            product[id].qty = product[id].qty - qty;
+            profit = qty * (product[id].sellPrice - product[id].buyPrice);
+            system("cls");
+            cout << "\nProduct checkout successfully, Profit: RM "<< profit << "\n\n";
         }
-
-        cout << "\n 1.Insert product \n 2.Search product"
-             << "\n 3.Checkout \n 4.Update \n 5.Delete \n 6.Exit" << endl;
-        cout << "\nChoose your option(1-7):";
-        cin  >> input; 
-        switch(input)
-        {
-            case '1':
-                Insert();
-                break;
-            case '2':
-                Search();
-                break;
-            case '3':
-                Checkout();
-                break;
-            case '4':
-                Update();
-                break;
-            case '5':
-                Delete();
-                break;
-            case '6':
-                system("cls");
-                cout << "\n\t\t\tThank you for choosing us.\n\t\t\tEnjoy Your Products! ^U^\n";
-                cout << "\n\t\tProgram Ended. Press Any Key To Exit Screen ^U^\n\n\n" << endl;
-                return 0;
-                break;
-            default:
-                cout << "Invalid option!" << endl << endl;
-                break;
-        }
-    }   while(input >= '1' && input <= '5');
-    return 0;
+    }
 }
-
 
 
