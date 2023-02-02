@@ -1,7 +1,44 @@
 #include <iostream>
 #include <string>
 #include <regex>
+#include <fstream>
 using namespace std;
+/*
+CHANGES MADE:
+- struct > class (that was easy)
+- Changes to Insert()
+- Save and Load data from previous sessions
+
+*/
+//Class
+class Product {
+    public:
+        int id; //Humans start counting from 1, e.g. product[0] has ID of 1.
+        string type;
+        string brand;
+        int qty;
+        double buyPrice;
+        double sellPrice;
+    void displayEntry() {
+        cout
+        << " "
+        << id       << ".\t"
+        << type     << "  \t"
+        << brand    << "\t\t  "
+        << qty      << "\t\t  "
+        << buyPrice << "\t\t\t"
+        << sellPrice << "\n";
+    }
+    void editEntry(int id, string type, string brand, int qty, double buyPrice, double sellPrice) {
+        this->id = id;
+        this->type = type;
+        this->brand = brand;
+        this->qty = qty;
+        this->buyPrice = buyPrice;
+        this->sellPrice = sellPrice;
+    }
+};
+
 
 //Function declaration
 void Display(int start, int end);
@@ -10,6 +47,8 @@ void Search();
 void Edit();
 void Delete();
 void Checkout();
+void Load();
+void Save();
 
 //Operation function declaration
 string stringToLower(string str);
@@ -20,18 +59,13 @@ bool isDouble(string str);
 //Var declaration
 static int inventoryLimit = 100;
 int productCount = 0;
-struct inventory 
-{
-    int id; //Humans start counting from 1, e.g. product[0] has ID of 1.
-    string type;
-    string brand;
-    int qty;
-    double buyPrice;
-    double sellPrice;
-} product[100];
+Product product[100];
 
 int main()
 {
+    //Read file here, Cases include: Success, Missing or Error.
+    Load();
+
     string input;
     char choice;
     do
@@ -72,7 +106,9 @@ int main()
                     break;
                 case '6':
                     system("cls||clear");
-                    cout << "\n\t\t\tThank you for choosing us.\n\t\t\tEnjoy Your Products! ^U^\n";
+                    Save();
+                    cout << "\n\t\t\tThank you for choosing us.\n\t\t\tEnjoy Your Products! ^U^\n";\
+                    // Save file
                     return 0;
                     break;
                 default:
@@ -127,15 +163,7 @@ void Display(int start, int end)
     cout << " Id\tName\t\tBrand\t\tQuantity\t Cost(RM)\t Selling Price(RM)" << endl;
     for (int i = start; i < end; i++)
     {
-        cout
-        << " "
-        <<  product[i].id       << ".\t"
-        <<  product[i].type     << "  \t"
-        <<  product[i].brand    << "\t\t  "
-        <<  product[i].qty      << "\t\t  "
-        <<  product[i].buyPrice << "\t\t\t"
-        <<  product[i].sellPrice
-        << "\n";
+        product[i].displayEntry();
     } //Table is not perfect in formatting, but current solution is satisfactory.
     cout << "\n";
 }
@@ -148,79 +176,50 @@ void Insert()
     {
         //Display all the products and brands.
         system("cls||clear"); //Clear terminal.
-        cout
-        <<  " Product List                        \n"
-        <<  "+------+--------------+-------------+\n"
-        <<  "| List | Product      | Brand       |\n"
-        <<  "+------+--------------+-------------+\n"
-        <<  "|  a.  | Racquet      | Yonex       |\n"
-        <<  "|  b.  |              | Li Ning     |\n"
-        <<  "|  c.  |              | Fleet       |\n"
-        <<  "|  d.  |              | Apacs       |\n"
-        <<  "|  e.  |              | Victor      |\n"
-        <<  "+------+--------------+-------------+\n"
-        <<  "|  f.  | Shuttlecock  | Yonex       |\n"
-        <<  "|  g.  |              | Li Ning     |\n"
-        <<  "|  h.  |              | RSL         |\n"
-        <<  "|  i.  |              | Ling Mei    |\n"
-        <<  "+------+--------------+-------------+\n"
-        <<  "|  j.  | Grip tape    | Yonex       |\n"
-        <<  "|  k.  |              | Li Ning     |\n"
-        <<  "|  l.  |              | Apacs       |\n"
-        <<  "|  m.  |              | Victor      |\n"
-        <<  "+------+--------------+-------------+\n";
+        cout // Brands: Yonex, Li Ning, Fleet, Apacs, Victor
+        <<  "     Product List      \n"
+        <<  "+------+--------------+\n"
+        <<  "| List | Product      |\n"
+        <<  "+------+--------------+\n"
+        <<  "|  a.  | Racquet      |\n"
+        <<  "|  b.  | Shuttlecock  |\n"
+        <<  "|  c.  | Grip tape    |\n"
+        <<  "|  d.  | Others       |\n"
+        <<  "+------+--------------+\n";
         i = productCount;
         product[i].id = i + 1;
-        do  //Type and brand of product
+        do  //Type of product
         {
-            cout << "Enter a choice from the menu(a-m) from product " << product[i].id << ": ";
+            cout << "Enter a choice from the menu(a-d) for type of product " << product[i].id << ": ";
             getline(cin, input); //Using getline instead of cin to combat errors regarding spaces.
             choice = toupper(input[0]); //Taking only first letter, to prevent errors.
             switch (choice) {
                 case 'A':
-                    product[i].type="Racquet"; product[i].brand="Yonex";
+                    product[i].type = "Racquet";
                     break;
                 case 'B':
-                    product[i].type="Racquet"; product[i].brand="Li Ning";
+                    product[i].type = "Shuttlecock";
                     break;
                 case 'C':
-                    product[i].type="Racquet"; product[i].brand="Fleet";
+                    product[i].type = "Grip tape";
                     break;
                 case 'D':
-                    product[i].type="Racquet"; product[i].brand="Apacs";
-                    break;
-                case 'E':
-                    product[i].type="Racquet"; product[i].brand="Victor";
-                    break;
-                case 'F':
-                    product[i].type="Shuttlecock"; product[i].brand="Yonex";
-                    break;
-                case 'G':
-                    product[i].type="Shuttlecock"; product[i].brand="Li Ning";
-                    break;
-                case 'H':
-                    product[i].type="Shuttlecock"; product[i].brand="RSL";
-                    break;
-                case 'I':
-                    product[i].type="Shuttlecock"; product[i].brand="Ling Mei";
-                    break;
-                case 'J':
-                    product[i].type="Grip tape"; product[i].brand="Yonex";
-                    break;
-                case 'K':
-                    product[i].type="Grip tape"; product[i].brand="Li Ning";
-                    break;
-                case 'L':
-                    product[i].type="Grip tape"; product[i].brand="Apacs";
-                    break;
-                case 'M':
-                    product[i].type="Grip tape"; product[i].brand="Victor";
+                    cout << "Enter the brand of product " << product[i].id << " (e.g. Yonex, Lining): ";
+                    getline(cin, input); //Using getline instead of cin to combat errors regarding spaces.
+                    product[i].type = input;;
                     break;
                 default:
-                    cout << "Please enter an alphabet within a-m\n";
+                    cout << "Please enter an alphabet within a-d\n";
                     break;
             }                    
-        }   while (!isBetween('A', 'M', choice)); //If error, try again
+        }   while (!isBetween('A', 'D', choice)); /*If error, try again
+        
+        do(n't) //Brand of product, doesnt require do-while loop and curly braces but OCD hits. */
+        { 
+            cout << "Enter the brand of product " << product[i].id << " (e.g. Yonex, Li Ning): ";
+            getline(cin, input); //Using getline instead of cin to combat errors regarding spaces.
+            product[i].brand = input;
+        }
 
         do  //Qty of product
         {
@@ -386,11 +385,7 @@ void Delete()
         {
             for(int i = 0; i < productCount; i++)
             {
-                product[i].type = "";
-                product[i].brand = "";
-                product[i].qty = 0;
-                product[i].buyPrice = 0;
-                product[i].sellPrice = 0;
+                product[i].editEntry(0, "", "", 0, 0, 0);
             }
             productCount = 0;
             system("cls||clear");
@@ -400,11 +395,7 @@ void Delete()
         {
             //Move up the empty row to replace the row that was deleted.
             for (int i = id - 1; i < productCount; i++) {
-                product[i].type = product[i+1].type;
-                product[i].brand = product[i+1].brand;
-                product[i].qty = product[i+1].qty;
-                product[i].buyPrice = product[i+1].buyPrice;
-                product[i].sellPrice = product[i+1].sellPrice;
+                product[i].editEntry(product[i].id, product[i+1].type, product[i+1].brand, product[i+1].qty, product[i+1].buyPrice, product[i+1].sellPrice);
             }
             system("cls||clear");
             cout << "Deleted successfully.\n\n";
@@ -445,5 +436,46 @@ void Checkout(){
             getline(cin, input); //dummy var input
             system("cls||clear");
         }
+    }
+}
+void Save() {
+    //Save by overwritting the file.
+    ofstream saveData("savedata.txt");
+    for (int i = 0; i < inventoryLimit; i++) {
+        saveData << product[i].id << endl;
+        saveData << product[i].type << endl;
+        saveData << product[i].brand<< endl;
+        saveData << product[i].qty << endl;
+        saveData << product[i].buyPrice << endl;
+        saveData << product[i].sellPrice << endl;
+    }
+    saveData.close();
+}
+void Load() {
+    ifstream saveData("savedata.txt");
+    string temp[inventoryLimit][6];
+    bool error;
+
+    for (int i = 0; i < inventoryLimit; i++) {
+        for (int j = 0; j < 6; j++) {
+            getline(saveData, temp[i][j]);
+            if (!isInteger(temp[i][0]) || !isInteger(temp[i][3]) || !isDouble(temp[i][4]) || isDouble(temp[i][5]))  
+            //Save data verification, Checks if data type is correct (id and qty is int, prices are double).
+                error = true;
+        }
+    }
+    saveData.close();
+    if (error) {
+        cout << "\nError reading saved file, due to invalid data. \n\n";
+        return;
+    }
+    for (int i = 0; i < inventoryLimit; i++) {
+        if (stoi(temp[i][0]) != 0) productCount++;
+        product[i].id = stoi(temp[i][0]);
+        product[i].type = temp[i][1];
+        product[i].brand = temp[i][2];
+        product[i].qty = stoi(temp[i][3]);
+        product[i].buyPrice = stod(temp[i][4]);
+        product[i].sellPrice = stod(temp[i][5]);
     }
 }
