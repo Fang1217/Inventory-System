@@ -121,6 +121,24 @@ bool isDouble(string str) { //Check whether the input is a double.
 }
 //End of Operation functions
 
+void Display(int start, int end)
+{
+    //Display from entry (int start) to (int end).
+    cout << " Id\tName\t\tBrand\t\tQuantity\t Cost(RM)\t Selling Price(RM)" << endl;
+    for (int i = start; i < end; i++)
+    {
+        cout
+        << " "
+        <<  product[i].id       << ".\t"
+        <<  product[i].type     << "  \t"
+        <<  product[i].brand    << "\t\t  "
+        <<  product[i].qty      << "\t\t  "
+        <<  product[i].buyPrice << "\t\t\t"
+        <<  product[i].sellPrice
+        << "\n";
+    } //Table is not perfect in formatting, but current solution is satisfactory.
+    cout << "\n";
+}
 void Insert()
 {
     char choice, next;
@@ -260,25 +278,6 @@ void Insert()
         system("cls||clear");
     }   while (toupper(choice) == 'Y'); //Stop adding next product
 }
-
-void Display(int start, int end)
-{
-    //Display from entry (int start) to (int end).
-    cout << " Id\tName\t\tBrand\t\tQuantity\t Cost(RM)\t Selling Price(RM)" << endl;
-    for (int i = start; i < end; i++)
-    {
-        cout
-        << " "
-        <<  product[i].id       << ".\t"
-        <<  product[i].type     << "  \t"
-        <<  product[i].brand    << "\t\t  "
-        <<  product[i].qty      << "\t\t  "
-        <<  product[i].buyPrice << "\t\t\t"
-        <<  product[i].sellPrice
-        << "\n";
-    } //Table is not perfect in formatting, but current solution is satisfactory.
-    cout << "\n";
-}
 void Search() //Searches the inventory (search keyword case insensitive.)
 {   
     if (productCount == 0) {
@@ -287,8 +286,6 @@ void Search() //Searches the inventory (search keyword case insensitive.)
         return; 
     }
     bool found = false;  
-    string searchProdName;
-    string searchBrand;
     string searchQuery[4];  // 0: search type, 1: inv type, 2: search brand, 3: inv brand
     cout << "Enter name of product you want to find: ";
     getline(cin,searchQuery[0]);
@@ -306,7 +303,7 @@ void Search() //Searches the inventory (search keyword case insensitive.)
             cout << "Product " << product[i].type << " found, details as follows:" << endl;
             Display(i, i+1);
             cout << "Press enter to continue.";
-            getline(cin, searchProdName);
+            getline(cin, searchQuery[0]); //dummy var input
             system("cls||clear");
             return;
         }
@@ -315,57 +312,6 @@ void Search() //Searches the inventory (search keyword case insensitive.)
         system("cls||clear");
         cout << "Product not found in inventory system.\n\n";
 }
-
-void Delete()
-{   
-    string input;
-    int id;
-    if (productCount == 0) {
-        system("cls||clear");
-        cout << "You can't delete product when there is no product.\n\n";
-        return; 
-    }
-    cout << "Enter the product ID to delete (Enter 0 to delete all, or -1 to cancel): ";
-    getline(cin, input);
-    if (input == "-1") { system("cls||clear"); } //do nothing
-    else if (!isInteger(input) || (stoi(input) > productCount)) {
-        cout << "Invalid option." << endl;
-        Delete();
-    }
-    else
-    {
-        id = stoi(input); 
-        if (id == 0) //Clear all
-        {
-            for(int i = 0; i < productCount; i++)
-            {
-                product[i].type = "";
-                product[i].brand = "";
-                product[i].qty = 0;
-                product[i].buyPrice = 0;
-                product[i].sellPrice = 0;
-            }
-            productCount = 0;
-            system("cls||clear");
-            cout << "All product deleted successfully.\n\n";
-        }
-        else //Clear a particular ID
-        {
-            //Move up the empty row to replace the row that was deleted.
-            for (int i = id - 1; i < inventoryLimit; i++) {
-                product[i].type = product[i+1].type;
-                product[i].brand = product[i+1].brand;
-                product[i].qty = product[i+1].qty;
-                product[i].buyPrice = product[i+1].buyPrice;
-                product[i].sellPrice = product[i+1].sellPrice;
-            }
-            system("cls||clear");
-            cout << "Deleted successfully.\n\n";
-            productCount--;
-        }
-    }
-}
-
 void Edit()
 {
     string input;
@@ -404,7 +350,7 @@ void Edit()
             if (!isDouble(input))
                 cout << "Invalid input.\n";
             else product[id].buyPrice = stod(input);
-        }  while (!isInteger(input));
+        }  while (!isDouble(input));
         do {
             cout << "Enter new selling price: ";
             getline(cin, input);
@@ -412,12 +358,60 @@ void Edit()
             //Additional condition: must be higher than buying price (cost).
                 cout << "Invalid input.\n";
             else product[id].sellPrice = stod(input);
-        }  while (!isInteger(input));
+        }  while (!isDouble(input));
         system("cls||clear");
         cout << "Updated successfully.\n\n";
     }
 }
-
+void Delete()
+{   
+    string input;
+    int id;
+    if (productCount == 0) {
+        system("cls||clear");
+        cout << "You can't delete product when there is no product.\n\n";
+        return; 
+    }
+    cout << "Enter the product ID to delete (Enter 0 to delete all, or -1 to cancel): ";
+    getline(cin, input);
+    if (input == "-1") { system("cls||clear"); } //do nothing
+    else if (!isInteger(input) || (stoi(input) > productCount)) {
+        cout << "Invalid option." << endl;
+        Delete();
+    }
+    else
+    {
+        id = stoi(input); 
+        if (id == 0) //Clear all
+        {
+            for(int i = 0; i < productCount; i++)
+            {
+                product[i].type = "";
+                product[i].brand = "";
+                product[i].qty = 0;
+                product[i].buyPrice = 0;
+                product[i].sellPrice = 0;
+            }
+            productCount = 0;
+            system("cls||clear");
+            cout << "All product deleted successfully.\n\n";
+        }
+        else //Clear a particular ID
+        {
+            //Move up the empty row to replace the row that was deleted.
+            for (int i = id - 1; i < productCount; i++) {
+                product[i].type = product[i+1].type;
+                product[i].brand = product[i+1].brand;
+                product[i].qty = product[i+1].qty;
+                product[i].buyPrice = product[i+1].buyPrice;
+                product[i].sellPrice = product[i+1].sellPrice;
+            }
+            system("cls||clear");
+            cout << "Deleted successfully.\n\n";
+            productCount--;
+        }
+    }
+}
 void Checkout(){
     string input;
     int id, qty;
@@ -453,5 +447,3 @@ void Checkout(){
         }
     }
 }
-
-
