@@ -7,7 +7,7 @@ using namespace std;
 CHANGES MADE:
 - struct > class (that was easy)
 - Changes to Insert()
-- Save and Load data from previous sessions
+- Save and Load data from previous sessions - Save() and Load()
 
 */
 //Class
@@ -106,9 +106,7 @@ int main()
                     break;
                 case '6':
                     system("cls||clear");
-                    Save();
                     cout << "\n\t\t\tThank you for choosing us.\n\t\t\tEnjoy Your Products! ^U^\n";\
-                    // Save file
                     return 0;
                     break;
                 default:
@@ -204,9 +202,9 @@ void Insert()
                     product[i].type = "Grip tape";
                     break;
                 case 'D':
-                    cout << "Enter the brand of product " << product[i].id << " (e.g. Yonex, Lining): ";
+                    cout << "Enter the type of product " << product[i].id << ": ";
                     getline(cin, input); //Using getline instead of cin to combat errors regarding spaces.
-                    product[i].type = input;;
+                    product[i].type = input;
                     break;
                 default:
                     cout << "Please enter an alphabet within a-d\n";
@@ -275,6 +273,7 @@ void Insert()
             }
         }   while (toupper(choice) != 'Y' && toupper(choice) != 'N');
         system("cls||clear");
+        Save();
     }   while (toupper(choice) == 'Y'); //Stop adding next product
 }
 void Search() //Searches the inventory (search keyword case insensitive.)
@@ -360,6 +359,7 @@ void Edit()
         }  while (!isDouble(input));
         system("cls||clear");
         cout << "Updated successfully.\n\n";
+        Save();
     }
 }
 void Delete()
@@ -402,6 +402,7 @@ void Delete()
             productCount--;
         }
     }
+    Save();
 }
 void Checkout(){
     string input;
@@ -436,7 +437,8 @@ void Checkout(){
             getline(cin, input); //dummy var input
             system("cls||clear");
         }
-    }
+    }    
+    Save();
 }
 void Save() {
     //Save by overwritting the file.
@@ -454,18 +456,22 @@ void Save() {
 void Load() {
     ifstream saveData("savedata.txt");
     string temp[inventoryLimit][6];
-    bool error;
+    bool error = false;
 
     for (int i = 0; i < inventoryLimit; i++) {
         for (int j = 0; j < 6; j++) {
             getline(saveData, temp[i][j]);
-            if (!isInteger(temp[i][0]) || !isInteger(temp[i][3]) || !isDouble(temp[i][4]) || isDouble(temp[i][5]))  
-            //Save data verification, Checks if data type is correct (id and qty is int, prices are double).
-                error = true;
         }
+        if ((!isInteger(temp[i][0])) || (!isInteger(temp[i][3])) || (!isDouble(temp[i][4])) || (!isDouble(temp[i][5])))  
+        //Save data verification, Checks if data type is correct (id and qty is int, prices are double).
+            error = true;
     }
     saveData.close();
-    if (error) {
+    if (saveData.fail()) {
+        cout << "\nSave file not detected. Input data to save.\n\n";
+        return;
+    }
+    else if (error) {
         cout << "\nError reading saved file, due to invalid data. \n\n";
         return;
     }
