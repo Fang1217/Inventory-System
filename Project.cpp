@@ -2,121 +2,58 @@
 #include <string>
 #include <regex>
 #include <fstream>
+#include <iomanip>
 using namespace std;
-/*
-CHANGES MADE:
-- struct > class (that was easy)
-- Changes to Insert()
-- Save and Load data from previous sessions - Save() and Load()
 
-*/
-//Class
 class Product {
     public:
-        int id; //Humans start counting from 1, e.g. product[0] has ID of 1.
-        string type;
-        string brand;
-        int qty;
-        double buyPrice;
-        double sellPrice;
-    void displayEntry() {
-        cout
-        << " "
-        << id       << ".\t"
-        << type     << "  \t"
-        << brand    << "\t\t  "
-        << qty      << "\t\t  "
-        << buyPrice << "\t\t\t"
-        << sellPrice << "\n";
+        int id; //ID that is human-friendly.
+        string type; //Type of product.
+        string brand; //Brand of product.
+        int qty; //Quantity of product
+        double buyPrice; //Cost of product
+        double sellPrice; //Selling price of product.
+    void displayEntry(int columnWidth[6]) {
+        //Function to display all the details of product.
+        cout.setf(ios::fixed | ios::showpoint);
+        cout.precision(2);
+        cout << setfill(' ') 
+            <<  "| " << setw(columnWidth[0] - 1) << right << id << "."
+            << " | " << setw(columnWidth[1]) <<  left << type
+            << " | " << setw(columnWidth[2]) <<  left << brand
+            << " | " << setw(columnWidth[3]) << right << qty
+            << " | " << setw(columnWidth[4]) << right << buyPrice
+            << " | " << setw(columnWidth[5]) << right << sellPrice << " |\n";
     }
+
     void editEntry(int id, string type, string brand, int qty, double buyPrice, double sellPrice) {
+        //Function to edit the details of product.
         this->id = id;
         this->type = type;
         this->brand = brand;
         this->qty = qty;
         this->buyPrice = buyPrice;
         this->sellPrice = sellPrice;
-    }
+    }    
 };
-
-
-//Function declaration
-void Display(int start, int end);
-void Insert();
-void Search();
-void Edit();
-void Delete();
-void Checkout();
-void Load();
-void Save();
-
+//Function declarations
+void Display(int start, int end); //Display from ID A to B (index)
+void Insert(); //Insert product
+void Search(); //Search inventory
+void Edit();   //Edit product Details 
+void Delete(); //Delete product details
+void Checkout(); //Transaction, product reduction
+void Load(); //Load from previous sessions
+void Save(); //Save session for next session
 //Operation function declaration
 string stringToLower(string str);
 bool isBetween(char lower, char upper, char input);
 bool isInteger(string str);
 bool isDouble(string str);
-
 //Var declaration
 static int inventoryLimit = 100;
 int productCount = 0;
 Product product[100];
-
-int main()
-{
-    //Read file here, Cases include: Success, Missing or Error.
-    Load();
-
-    string input;
-    char choice;
-    do
-    {   //Main menu section
-        cout << "\tWelcome to Inventory System. ^U^\n";
-        if (productCount > 0) {
-            //If at least 1 product is added, display the cart.
-            cout << "\nCurrent inventory:\n";   
-            Display(0, productCount);
-        }
-        cout << "1.Insert product\n" 
-             << "2.Search product\n"
-             << "3.Edit\n" 
-             << "4.Delete\n"
-             << "5.Checkout\n" 
-             << "6.Exit\n\n";
-        do 
-        {
-            cout << "Please select your option (1-6): ";
-            getline(cin, input);
-            choice = input[0];
-            switch(choice)
-            {
-                case '1': //Insert product
-                    Insert();
-                    break;
-                case '2': //Search product
-                    Search();
-                    break;
-                case '3': //Edit
-                    Edit();
-                    break;
-                case '4': //Delete
-                    Delete();
-                    break;
-                case '5': //Checkout
-                    Checkout();
-                    break;
-                case '6':
-                    system("cls||clear");
-                    cout << "\n\t\t\tThank you for choosing us.\n\t\t\tEnjoy Your Products! ^U^\n";\
-                    return 0;
-                    break;
-                default:
-                    cout << "Invalid option!" << endl << endl;
-                    break;
-            }
-        }   while(!isBetween('1', '6', choice)); //Repeat for error input.
-    }   while(isBetween('1', '5', choice)); //Repeat after completing the section.
-    return 0;
-}
 
 //Operation functions
 string stringToLower(string str) {
@@ -155,19 +92,129 @@ bool isDouble(string str) { //Check whether the input is a double.
 }
 //End of Operation functions
 
-void Display(int start, int end)
+int main()
 {
+    Load(); //Read file.
+    string input;
+    char choice;
+    do
+    {   //Main menu section
+        cout << "\tWelcome to Inventory System. ^U^\n";
+        if (productCount > 0) {
+            //If at least 1 product is added, display the cart.
+            cout << "\nCurrent inventory:\n";   
+            Display(0, productCount);
+        }
+        cout << "1.Insert product\n" 
+             << "2.Search product\n"
+             << "3.Edit\n" 
+             << "4.Delete\n"
+             << "5.Checkout\n" 
+             << "6.Exit\n\n";
+        do 
+        {
+            cout << "Please select your option (1-6): ";
+            getline(cin, input); //Using getline instead of cin to combat errors regarding spaces.
+            choice = input[0]; // Only receive one letter to prevent error.
+            switch (choice)
+            {
+                case '1': //Insert product
+                    Insert();
+                    break;
+                case '2': //Search product
+                    Search();
+                    break;
+                case '3': //Edit
+                    Edit();
+                    break;
+                case '4': //Delete
+                    Delete();
+                    break;
+                case '5': //Checkout
+                    Checkout();
+                    break;
+                case '6':
+                    system("cls||clear"); //Clears terminal, where 'cls' - Windows, 'clear' - Mac devices.
+                    cout << "\n\t\t\tThank you for choosing us.\n\t\t\tEnjoy Your Products! ^U^\n";\
+                    return 0;
+                    break;
+                default:
+                    cout << "Invalid option!" << endl << endl;
+                    break;
+            }
+        }   while(!isBetween('1', '6', choice)); //Repeat for error input.
+    }   while(isBetween('1', '5', choice)); //Repeat after completing the section.
+    return 0;
+}
+
+void Display(int start, int end)
+{    
+    int longest[6] = {0, 0, 0, 0, 0, 0};
+    for (int i = start; i < end; i++)
+    {   //Get the longest length to set column width
+        if (to_string(product[i].id).length() > longest[0]) 
+            longest[0] = to_string(product[i].id).length() + 1; //To include '.'
+        if (product[i].type.length() > longest[1]) 
+            longest[1] = product[i].type.length();
+        if (product[i].brand.length() > longest[2]) 
+            longest[2] = product[i].brand.length();
+        if (to_string(product[i].qty).length() > longest[3]) 
+            longest[3] = to_string(product[i].qty).length();
+        if (to_string(product[i].buyPrice).length() > longest[4]) 
+            longest[4] = to_string((int) product[i].buyPrice).length() + 3;
+        if (to_string(product[i].sellPrice).length() > longest[5]) 
+            longest[5] = to_string((int) product[i].sellPrice).length() + 3;
+    };
+    //Title length: 3, 7, 5, 3, 9, 15; and compare them with the longest entry, whichever is longest.
+    int columnWidth[6] = {
+        max( 3, longest[0]),
+        max( 7, longest[1]),
+        max( 5, longest[2]),
+        max( 3, longest[3]),
+        max( 9, longest[4]),
+        max(15, longest[5]),
+    };
+
+    /* Example format      
+    +-----+-------------+--------------+-----+-----------+-----------------+
+    | Num | Product     | Brand        | Qty | Cost (RM) | Sell Price (RM) |
+    +-----+-------------+--------------+-----+-----------+-----------------+
+    |  1. | Racquet     | Li Ning      |   1 |     xx.xx |           xx.xx |
+    |  2. | Shuttlecock | Yonex        |   1 |     xx.xx |           xx.xx |
+    |  3. | Grip tape   | Li Ning      |   1 |     xx.xx |           xx.xx |
+    |  4. | Others      | Yonex        |   1 |     xx.xx |           xx.xx |
+    +-----+-------------+--------------+-----+-----------+-----------------+
+    Gets the highest length from longest data, then create a table with X wide 
+    (aligned left for string, or right for numbers)
+    */
+    for (int i = 0; i < 6; i++)
+        cout << "+" << setfill('-') << setw(2 + columnWidth[i]) << "-";
+    cout << "+\n";
+    cout << setfill(' ') 
+         <<  "| " << setw(columnWidth[0]) << left << "Num"
+         << " | " << setw(columnWidth[1]) << left << "Name"
+         << " | " << setw(columnWidth[2]) << left << "Brand"
+         << " | " << setw(columnWidth[3]) << left << "Qty"
+         << " | " << setw(columnWidth[4]) << left << "Cost (RM)"
+         << " | " << setw(columnWidth[5]) << left << "Sell Price (RM)" << " |\n";
+    for (int i = 0; i < 6; i++)
+        cout << "+" << setfill('-') << setw(2 + columnWidth[i]) << "-";
+    cout << "+\n";
+
     //Display from entry (int start) to (int end).
-    cout << " Id\tName\t\tBrand\t\tQuantity\t Cost(RM)\t Selling Price(RM)" << endl;
     for (int i = start; i < end; i++)
     {
-        product[i].displayEntry();
-    } //Table is not perfect in formatting, but current solution is satisfactory.
-    cout << "\n";
+        product[i].displayEntry(columnWidth);
+    }
+
+    for (int i = 0; i < 6; i++)
+        cout << "+" << setfill('-') << setw(2 + columnWidth[i]) << "-";
+    cout << "+\n\n";
 }
+
 void Insert()
 {
-    char choice, next;
+    char choice;
     int i;
     string input;
     do  //Section to add item, with loop responsible for each details of that item.
@@ -189,7 +236,7 @@ void Insert()
         do  //Type of product
         {
             cout << "Enter a choice from the menu(a-d) for type of product " << product[i].id << ": ";
-            getline(cin, input); //Using getline instead of cin to combat errors regarding spaces.
+            getline(cin, input); 
             choice = toupper(input[0]); //Taking only first letter, to prevent errors.
             switch (choice) {
                 case 'A':
@@ -262,6 +309,7 @@ void Insert()
         }   while ((!isDouble(input)) || (product[i].sellPrice <= product[i].buyPrice));
         productCount++;
         cout << "Product added successfully.\n";
+        
         do  //Query on adding next product
         {   
             cout << "Do you want to add more product? (Y/N)";
@@ -442,6 +490,8 @@ void Checkout(){
 }
 void Save() {
     //Save by overwritting the file.
+    //Saves happen when: 
+    //Each product in Insert-265, Edit-351, Delete-394, Checkout-430
     ofstream saveData("savedata.txt");
     for (int i = 0; i < inventoryLimit; i++) {
         saveData << product[i].id << endl;
@@ -455,8 +505,8 @@ void Save() {
 }
 void Load() {
     ifstream saveData("savedata.txt");
-    string temp[inventoryLimit][6];
-    bool error = false;
+    string temp[inventoryLimit][6]; //String buffer, to be validated and converted 
+    bool error = false; 
 
     for (int i = 0; i < inventoryLimit; i++) {
         for (int j = 0; j < 6; j++) {
@@ -468,14 +518,17 @@ void Load() {
     }
     saveData.close();
     if (saveData.fail()) {
+        //Saved data does not exist.
         cout << "\nSave file not detected. Input data to save.\n\n";
         return;
     }
     else if (error) {
-        cout << "\nError reading saved file, due to invalid data. \n\n";
+        //Invalid data detected in the savefile.
+        cout << "\nError reading saved file, due to invalid data.\n\n";
         return;
     }
     for (int i = 0; i < inventoryLimit; i++) {
+        //Stores the buffer data into program.
         if (stoi(temp[i][0]) != 0) productCount++;
         product[i].id = stoi(temp[i][0]);
         product[i].type = temp[i][1];
